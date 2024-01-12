@@ -1,6 +1,7 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Template for auto scaling Fargate service based on basic serverless container app
 
+# Parameters for the template
 Parameters:
   VpcStack:
     Type: String
@@ -22,7 +23,9 @@ Parameters:
     Description: Max containers to scale to
     Default: 4
 
+# Define the AWS resources to be created
 Resources:
+  # Target Group for the load balancer
   TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
@@ -33,8 +36,10 @@ Resources:
       Protocol: HTTP
       TargetType: ip
       VpcId:
+        # Import VPC ID from the specified VPC stack
         Fn::ImportValue: !Sub ${VpcStack}-vpc-id
 
+  # Listener for the Application Load Balancer
   Listener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
@@ -43,16 +48,19 @@ Resources:
           TargetGroupArn: !Ref TargetGroup
           Type: forward
       LoadBalancerArn:
+        # Import the ALB ARN from the ECS Cluster Stack
         Fn::ImportValue: !Sub ${EcsClusterStack}-alb-arn
       Port: 8080
       Protocol: HTTP
     DependsOn:
       - TargetGroup
 
+  # Fargate service definition
   FargateService:
     Type: AWS::ECS::Service
     Properties:
       Cluster:
+        # Import the ECS Cluster name
         Fn::ImportValue: !Sub ${EcsClusterStack}-ecs-cluster
       DeploymentController:
         Type: ECS
@@ -70,20 +78,21 @@ Resources:
       NetworkConfiguration:
           AwsvpcConfiguration:
             SecurityGroups:
-              -
-                Fn::ImportValue: !Sub ${EcsClusterStack}-default-security-group
+              # Import the default security group from ECS Cluster Stack
+              - Fn::ImportValue: !Sub ${EcsClusterStack}-default-security-group
             Subnets:
-              -
-                Fn::ImportValue: !Sub ${VpcStack}-private-subnet-a-id
-              -
-                Fn::ImportValue: !Sub ${VpcStack}-private-subnet-b-id
+              # Import the private subnet IDs from the VPC Stack
+              - Fn::ImportValue: !Sub ${VpcStack}-private-subnet-a-id
+              - Fn::ImportValue: !Sub ${VpcStack}-private-subnet-b-id
       TaskDefinition: !Ref FargateServiceTaskDefinition
 
+  # Log group for Fargate service
   FargateServiceLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
       RetentionInDays: 3
 
+  # Task definition for the Fargate service
   FargateServiceTaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
@@ -105,18 +114,17 @@ Resources:
               Protocol: tcp
       Cpu: '256'
       ExecutionRoleArn:
+        # Import the default role from ECS Cluster Stack
         Fn::ImportValue: !Sub ${EcsClusterStack}-default-role
       Memory: '512'
       NetworkMode: awsvpc
       RequiresCompatibilities:
         -  FARGATE
       TaskRoleArn:
+        # Import the default role from ECS Cluster Stack
         Fn::ImportValue: !Sub ${EcsClusterStack}-default-role
 
-# -----------------------------------------------------------
-#  AUTO SCALING
-# -----------------------------------------------------------
-
+# Auto Scaling configuration
   AutoScalingRole:
     Type: AWS::IAM::Role
     Properties:
@@ -137,6 +145,7 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
+                  # Permissions for auto scaling
                   - ecs:DescribeServices
                   - ecs:UpdateService
                   - cloudwatch:DeleteAlarms
@@ -144,6 +153,7 @@ Resources:
                   - cloudwatch:PutMetricAlarm
                 Resource: '*'
 
+  # Scalable target for Fargate service
   AutoScalingTarget:
     Type: AWS::ApplicationAutoScaling::ScalableTarget
     Properties:
@@ -158,6 +168,7 @@ Resources:
       ServiceNamespace: ecs
       RoleARN: !GetAtt AutoScalingRole.Arn
 
+  # Scaling policies
   ScaleUpPolicy:
     Type: AWS::ApplicationAutoScaling::ScalingPolicy
     Properties:
@@ -171,6 +182,7 @@ Resources:
         StepAdjustments:
           - MetricIntervalLowerBound: 0
             ScalingAdjustment: 1
+
   ScaleDownPolicy:
     Type: AWS::ApplicationAutoScaling::ScalingPolicy
     Properties:
@@ -185,6 +197,7 @@ Resources:
           - MetricIntervalUpperBound: 0
             ScalingAdjustment: -1
 
+  # CloudWatch Alarms for scaling
   AlarmHighRequests:
     Type: AWS::CloudWatch::Alarm
     Properties:
@@ -233,14 +246,16 @@ Resources:
       OKActions:
         - !Ref AlarmNotificationTopic
 
+  # SNS Topic for alarm notifications
   AlarmNotificationTopic:
     Type: AWS::SNS::Topic
     Properties:
       Subscription:
         - Endpoint: "pedro.devops@gmail.com"
           Protocol: "email"
+      TopicName: "AlarmNotificationTopic"
 
-
+# Outputs to export created resources for use in other stacks or references
 Outputs:
   FargateServiceName:
     Description: A reference to the created Fargate Service

@@ -1,52 +1,61 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Starter template for ECS
 
+# Parameters allow you to input custom values during stack creation
 Parameters:
   VpcStack:
     Type: String
     Description: Name of VPC stack to build off of
     Default: vpc
 
+# Define the AWS resources to be created
 Resources:
+  # ECR Repository for storing Docker images
   EcrRepo:
     Type: AWS::ECR::Repository
 
+  # ECS Cluster to host your services
   EcsCluster:
     Type: AWS::ECS::Cluster
 
+  # Default Security Group for ECS tasks and load balancer
   DefaultSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
         GroupDescription: Allow http to client host
         VpcId:
+          # Import VPC ID from the specified VPC stack
           Fn::ImportValue: !Sub ${VpcStack}-vpc-id
         SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
-          CidrIp: 0.0.0.0/0
-        - IpProtocol: tcp
-          FromPort: 8080
-          ToPort: 8080
-          CidrIp: 0.0.0.0/0
-        - IpProtocol: tcp
-          FromPort: 443
-          ToPort: 443
-          CidrIp: 0.0.0.0/0
+          # Inbound rules for HTTP, HTTPS, and a custom port (8080)
+          - IpProtocol: tcp
+            FromPort: 80
+            ToPort: 80
+            CidrIp: 0.0.0.0/0
+          - IpProtocol: tcp
+            FromPort: 8080
+            ToPort: 8080
+            CidrIp: 0.0.0.0/0
+          - IpProtocol: tcp
+            FromPort: 443
+            ToPort: 443
+            CidrIp: 0.0.0.0/0
         SecurityGroupEgress:
-        - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
-          CidrIp: 0.0.0.0/0
-        - IpProtocol: tcp
-          FromPort: 8080
-          ToPort: 8080
-          CidrIp: 0.0.0.0/0
-        - IpProtocol: tcp
-          FromPort: 443
-          ToPort: 443
-          CidrIp: 0.0.0.0/0
+          # Outbound rules (typically open to all for egress traffic)
+          - IpProtocol: tcp
+            FromPort: 80
+            ToPort: 80
+            CidrIp: 0.0.0.0/0
+          - IpProtocol: tcp
+            FromPort: 8080
+            ToPort: 8080
+            CidrIp: 0.0.0.0/0
+          - IpProtocol: tcp
+            FromPort: 443
+            ToPort: 443
+            CidrIp: 0.0.0.0/0
 
+  # IAM Role for ECS services and tasks
   DefaultRole:
     Type: 'AWS::IAM::Role'
     Properties:
@@ -66,7 +75,7 @@ Resources:
         - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
         - arn:aws:iam::aws:policy/AmazonECS_FullAccess
 
-
+  # Application Load Balancer for distributing incoming application traffic
   ApplicationLoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
@@ -75,10 +84,12 @@ Resources:
       SecurityGroups:
         - !Ref DefaultSecurityGroup
       Subnets:
+        # Use public subnets from the imported VPC stack
         - Fn::ImportValue: !Sub ${VpcStack}-public-subnet-a-id
         - Fn::ImportValue: !Sub ${VpcStack}-public-subnet-b-id
       Type: application
 
+# Outputs to export created resources for use in other stacks or references
 Outputs:
   EcsClusterExport:
     Description: A reference to the created ECS Cluster
@@ -87,7 +98,7 @@ Outputs:
       Name: !Sub ${AWS::StackName}-ecs-cluster
 
   DefaultSecurityGroupExport:
-    Description: A reference to the created SG
+    Description: A reference to the created Security Group
     Value: !Ref DefaultSecurityGroup
     Export:
       Name: !Sub ${AWS::StackName}-default-security-group
@@ -99,7 +110,7 @@ Outputs:
       Name: !Sub ${AWS::StackName}-default-role
 
   ApplicationLoadBalancerArnExport:
-    Description: A reference to the created ALB
+    Description: A reference to the created Application Load Balancer
     Value: !Ref ApplicationLoadBalancer
     Export:
       Name: !Sub ${AWS::StackName}-alb-arn

@@ -1,6 +1,7 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Basic VPC similar to the default VPC
 
+# Define the parameters for customizing the template
 Parameters:
   BasicVpcCidr:
     Type: String
@@ -27,9 +28,9 @@ Parameters:
     Description: Cidr of the private subnet B
     Default: 10.99.3.0/24   
 
-
-
+# Define the resources to be created
 Resources:
+  # VPC Resource
   BasicVpc:
     Type: AWS::EC2::VPC
     Properties:
@@ -40,6 +41,7 @@ Resources:
         - Key: Name
           Value: BasicVPC
 
+  # Public Subnet A
   PublicSubnetA:
     Type: AWS::EC2::Subnet
     Properties:
@@ -47,6 +49,8 @@ Resources:
       AvailabilityZone: us-east-1a
       VpcId: !Ref BasicVpc
       MapPublicIpOnLaunch: true
+
+  # Public Subnet B
   PublicSubnetB:
     Type: AWS::EC2::Subnet
     Properties:
@@ -54,12 +58,16 @@ Resources:
       AvailabilityZone: us-east-1b
       VpcId: !Ref BasicVpc
       MapPublicIpOnLaunch: true
+
+  # Private Subnet A
   PrivateSubnetA:
     Type: AWS::EC2::Subnet
     Properties:
       CidrBlock: !Ref PrivSubACidr
       AvailabilityZone: us-east-1a
       VpcId: !Ref BasicVpc
+
+  # Private Subnet B
   PrivateSubnetB:
     Type: AWS::EC2::Subnet
     Properties:
@@ -67,10 +75,7 @@ Resources:
       AvailabilityZone: us-east-1b
       VpcId: !Ref BasicVpc
 
-# -----------------------------------------------------------------------------
-# Public subnets
-# -----------------------------------------------------------------------------
-
+  # Public Route Tables
   PublicRouteTableA:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -80,20 +85,26 @@ Resources:
     Properties:
       VpcId: !Ref BasicVpc
 
+  # Internet Gateway for public internet access
   InternetGateway:
     Type: AWS::EC2::InternetGateway
+
+  # Attach the Internet Gateway to the VPC
   InternetGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
     Properties:
       InternetGatewayId: !Ref InternetGateway
       VpcId: !Ref BasicVpc
 
+  # Default route for public subnet A to Internet Gateway
   PublicDefaultRouteA:
     Type: AWS::EC2::Route
     Properties:
         RouteTableId: !Ref PublicRouteTableA
         DestinationCidrBlock: 0.0.0.0/0
         GatewayId: !Ref InternetGateway
+
+  # Default route for public subnet B to Internet Gateway
   PublicDefaultRouteB:
     Type: AWS::EC2::Route
     Properties:
@@ -101,21 +112,21 @@ Resources:
         DestinationCidrBlock: 0.0.0.0/0
         GatewayId: !Ref InternetGateway
 
+  # Associate Public Subnet A with its Route Table
   PublicSubnetARouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId: !Ref PublicSubnetA
       RouteTableId: !Ref PublicRouteTableA
+
+  # Associate Public Subnet B with its Route Table
   PublicSubnetBRouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId: !Ref PublicSubnetB
       RouteTableId: !Ref PublicRouteTableB
 
-# -----------------------------------------------------------------------------
-# Private subnets
-# -----------------------------------------------------------------------------
-
+  # Private Route Tables
   PrivateRouteTableA:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -125,6 +136,7 @@ Resources:
     Properties:
       VpcId: !Ref BasicVpc
 
+  # NAT Gateway and Elastic IP for private subnet A
   NatA:
    Type: AWS::EC2::NatGateway
    Properties:
@@ -137,6 +149,8 @@ Resources:
     Type: AWS::EC2::EIP
     Properties:
         Domain: vpc
+
+  # Route for private subnet A to NAT Gateway A
   NatRouteA:
     Type: AWS::EC2::Route
     Properties:
@@ -144,6 +158,7 @@ Resources:
         DestinationCidrBlock: 0.0.0.0/0
         NatGatewayId: !Ref NatA
 
+  # NAT Gateway and Elastic IP for private subnet B
   NatB:
    Type: AWS::EC2::NatGateway
    Properties:
@@ -156,6 +171,8 @@ Resources:
     Type: AWS::EC2::EIP
     Properties:
         Domain: vpc
+
+  # Route for private subnet B to NAT Gateway B
   NatRouteB:
     Type: AWS::EC2::Route
     Properties:
@@ -163,17 +180,21 @@ Resources:
         DestinationCidrBlock: 0.0.0.0/0
         NatGatewayId: !Ref NatB
 
+  # Associate Private Subnet A with its Route Table
   PrivateSubnetARouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId: !Ref PrivateSubnetA
       RouteTableId: !Ref PrivateRouteTableA
+
+  # Associate Private Subnet B with its Route Table
   PrivateSubnetBRouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId: !Ref PrivateSubnetB
       RouteTableId: !Ref PrivateRouteTableB
 
+# Outputs to export the created resources for use in other stacks
 Outputs:
   VpcExport:
     Description: A reference to the created VPC
