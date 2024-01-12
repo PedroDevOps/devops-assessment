@@ -8,7 +8,6 @@ Parameters:
     Default: vpc
 
 Resources:
-  # https://docs.aws.amazon.com/AmazonECR/latest/userguide/registry_auth.html
   EcrRepo:
     Type: AWS::ECR::Repository
 
@@ -79,7 +78,6 @@ Resources:
         - Fn::ImportValue: !Sub ${VpcStack}-public-subnet-a-id
         - Fn::ImportValue: !Sub ${VpcStack}-public-subnet-b-id
       Type: application
-
 
 Outputs:
   EcsClusterExport:

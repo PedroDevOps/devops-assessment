@@ -1,12 +1,39 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Basic VPC similar to the default VPC
 
+Parameters:
+  BasicVpcCidr:
+    Type: String
+    Description: Cidr of the VPC
+    Default: 10.99.0.0/16
+
+  PubSubACidr:
+    Type: String
+    Description: Cidr of the public subnet A
+    Default: 10.99.0.0/24
+
+  PubSubBCidr:
+    Type: String
+    Description: Cidr of the public subnet B
+    Default: 10.99.1.0/24           
+
+  PrivSubACidr:
+    Type: String
+    Description: Cidr of the private subnet A
+    Default: 10.99.2.0/24
+
+  PrivSubBCidr:
+    Type: String
+    Description: Cidr of the private subnet B
+    Default: 10.99.3.0/24   
+
+
 
 Resources:
   BasicVpc:
     Type: AWS::EC2::VPC
     Properties:
-      CidrBlock: 10.99.0.0/16
+      CidrBlock: !Ref BasicVpcCidr
       EnableDnsSupport: 'true'
       EnableDnsHostnames: 'true'
       Tags:
@@ -16,27 +43,27 @@ Resources:
   PublicSubnetA:
     Type: AWS::EC2::Subnet
     Properties:
-      CidrBlock: 10.99.0.0/24
+      CidrBlock: !Ref PubSubACidr
       AvailabilityZone: us-east-1a
       VpcId: !Ref BasicVpc
       MapPublicIpOnLaunch: true
   PublicSubnetB:
     Type: AWS::EC2::Subnet
     Properties:
-      CidrBlock: 10.99.1.0/24
+      CidrBlock: !Ref PubSubBCidr
       AvailabilityZone: us-east-1b
       VpcId: !Ref BasicVpc
       MapPublicIpOnLaunch: true
   PrivateSubnetA:
     Type: AWS::EC2::Subnet
     Properties:
-      CidrBlock: 10.99.2.0/24
+      CidrBlock: !Ref PrivSubACidr
       AvailabilityZone: us-east-1a
       VpcId: !Ref BasicVpc
   PrivateSubnetB:
     Type: AWS::EC2::Subnet
     Properties:
-      CidrBlock: 10.99.3.0/24
+      CidrBlock: !Ref PrivSubBCidr
       AvailabilityZone: us-east-1b
       VpcId: !Ref BasicVpc
 

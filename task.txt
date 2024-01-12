@@ -1,12 +1,3 @@
-
-The steps are as following: assessment task, HR talk, tech interview with the Head of the Department and final call with CEO.
-
- 
-
-Please find the Assessment task below:
-
- 
-
 Objective:
 
 This task is designed to evaluate your skills in deploying and securing containerized applications on AWS ECS Fargate, along with the ability to design for high availability and scalability.
@@ -21,45 +12,48 @@ Requirements:
 
 1.       Application Description:
 
-·  Use a simple web application for demonstration purposes.
+·        Use a simple web application for demonstration purposes. OK
 
-·        Containerize the application using Docker.
+·        Containerize the application using Docker. OK
+
+         Simple NodeJS with Hello Word running in Docker
 
 2.       Infrastructure Components:
 
-·        Implement AWS ECS Fargate for container orchestration.
+·        Implement AWS ECS Fargate for container orchestration. OK
 
-·        Set up an Application Load Balancer (ALB) for routing traffic to containers.
+·        Set up an Application Load Balancer (ALB) for routing traffic to containers. OK
+
 
 3.       Networking and Security:
 
-·        Use Amazon VPC for networking.
+·        Use Amazon VPC for networking. OK
 
-·        Implement private and public subnets for ECS Fargate and ALB.
+·        Implement private and public subnets for ECS Fargate and ALB. OK
 
-·        Configure security groups to restrict traffic to and from the containers.
+·        Configure security groups to restrict traffic to and from the containers. OK
 
-·        Implement network ACLs as needed for an additional layer of security.
+·        Implement network ACLs as needed for an additional layer of security. NOT OK
 
 4.       High Availability:
 
-·        Ensure high availability of the application by distributing containers across multiple Availability Zones.
+·        Ensure high availability of the application by distributing containers across multiple Availability Zones. OK
 
-·        Implement auto-scaling for ECS Fargate based on application load.
+·        Implement auto-scaling for ECS Fargate based on application load. OK
 
 5.       Deployment:
 
-·        Use ECS service definitions to define tasks and services.
+·        Use ECS service definitions to define tasks and services. OK
 
-·        Implement a rolling deployment strategy to minimize downtime during updates.
+·        Implement a rolling deployment strategy to minimize downtime during updates. OK
 
-·        Parameterize the CloudFormation template to allow customization for different environments.
+·        Parameterize the CloudFormation template to allow customization for different environments. 
 
 6.     Monitoring and Logging:
 
-·        Implement basic logging for the application using AWS CloudWatch Logs.
+·        Implement basic logging for the application using AWS CloudWatch Logs. OK
 
-·        Configure CloudWatch Alarms to monitor key performance metrics.
+·        Configure CloudWatch Alarms to monitor key performance metrics. OK
 
 Deliverables:
 
@@ -69,7 +63,7 @@ Deliverables:
 
 ·         Clearly document each resource and its purpose.
 
-·         Parameterize aspects such as VPC CIDR, subnet configurations, container image, etc.
+·         Parameterize aspects such as VPC CIDR, subnet configurations, container image, etc. 
 
 2.        README Documentation:
 

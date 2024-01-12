@@ -57,6 +57,9 @@ Resources:
       DeploymentController:
         Type: ECS
       DesiredCount: 2
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 50
       HealthCheckGracePeriodSeconds: 60
       LaunchType: FARGATE
       LoadBalancers:
@@ -182,36 +185,30 @@ Resources:
           - MetricIntervalUpperBound: 0
             ScalingAdjustment: -1
 
-  # # this alarm is somewhat nonsense but easy to test out
-  # # change to something relevant before production
-  
-  # AlarmHighRequests:
-  #   Type: AWS::CloudWatch::Alarm
-  #   Properties:
-  #     ActionsEnabled: TRUE
-  #     AlarmActions:
-  #       - !Ref ScaleUpPolicy
-  #     AlarmDescription: !Sub
-  #       - 'Scale Up Alarm based on requests for ${FargateServiceName}'
-  #       - FargateServiceName: !GetAtt FargateService.Name
-  #     ComparisonOperator: GreaterThanThreshold
-  #     DatapointsToAlarm: 2
-  #     # these can be found in the console after selecting a namespace to filter by
-  #     Dimensions:
-  #       - Name: TargetGroup
-  #         Value: !GetAtt TargetGroup.TargetGroupFullName
-  #     EvaluationPeriods: 3
-  #     # this can be found in the console on the screen before a metric is graphed
-  #     MetricName: RequestCountPerTarget
-  #     # this can be found in the console on the first screen of filtering metrics
-  #     Namespace: AWS/ApplicationELB
-  #     OKActions:
-  #       - !Ref ScaleDownPolicy
-  #     Period: 60
-  #     Statistic: Sum
-  #     Threshold: 3000
-  #     TreatMissingData: ignore
-  #     Unit: None # comes from the metric
+  AlarmHighRequests:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: TRUE
+      AlarmActions:
+        - !Ref ScaleUpPolicy
+      AlarmDescription: !Sub
+        - 'Scale Up Alarm based on requests for ${FargateServiceName}'
+        - FargateServiceName: !GetAtt FargateService.Name
+      ComparisonOperator: GreaterThanThreshold
+      DatapointsToAlarm: 2
+      Dimensions:
+        - Name: TargetGroup
+          Value: !GetAtt TargetGroup.TargetGroupFullName
+      EvaluationPeriods: 3
+      MetricName: RequestCountPerTarget
+      Namespace: AWS/ApplicationELB
+      OKActions:
+        - !Ref ScaleDownPolicy
+      Period: 60
+      Statistic: Sum
+      Threshold: 3000
+      TreatMissingData: ignore
+      Unit: None
 
   CpuUtilizationAlarm:
     Type: AWS::CloudWatch::Alarm
@@ -232,9 +229,16 @@ Resources:
       Threshold: 20
       ComparisonOperator: GreaterThanThreshold
       AlarmActions:
-        - !Ref ScaleUpPolicy
+        - !Ref AlarmNotificationTopic
       OKActions:
-        - !Ref ScaleDownPolicy
+        - !Ref AlarmNotificationTopic
+
+  AlarmNotificationTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      Subscription:
+        - Endpoint: "pedro.devops@gmail.com"
+          Protocol: "email"
 
 
 Outputs:
