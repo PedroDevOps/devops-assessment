@@ -1,7 +1,7 @@
-FROM node:14
+FROM node:12
 WORKDIR /usr/src
 COPY package*.json ./
 RUN npm install
-COPY src/ ./
+COPY index.js ./
 EXPOSE 8080
 CMD [ "node", "index.js" ]

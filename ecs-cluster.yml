@@ -105,3 +105,4 @@ Outputs:
     Value: !Ref ApplicationLoadBalancer
     Export:
       Name: !Sub ${AWS::StackName}-alb-arn
+      DNS: !GetAtt ApplicationLoadBalancer.DNSName

@@ -1,14 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Basic VPC similar to the default VPC
 
-Parameters:
-  Public_Subnet1_Cidr:
-    Type: String
-  Public_Subnet2_Cidr:
-    Type: String
-  VPC_Cidr:
-    Type: String
-
 
 Resources:
   BasicVpc:

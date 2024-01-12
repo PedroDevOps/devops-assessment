@@ -1,11 +1,17 @@
 ### Create CloudFormation Stacks
 
 ```
-aws cloudformation create-stack --template-body file://$PWD/infra/vpc.yml --stack-name vpc
+aws cloudformation create-stack --template-body file://$PWD/vpc.yml --stack-name vpc
 
 aws cloudformation create-stack --template-body file://$PWD/ecs-cluster.yml --stack-name ecs-cluster --capabilities CAPABILITY_IAM
 
-aws cloudformation create-stack --template-body file://$PWD/infra/cluster.yml --stack-name app-cluster
+aws cloudformation create-stack --template-body file://$PWD/container-with-auto-scalling.yml --stack-name container-with-auto-scalling --capabilities CAPABILITY_IAM
 
-aws cloudformation create-stack --template-body file://$PWD/infra/aplication.yml --stack-name api
+
+
+aws cloudformation delete-stack --stack-name vpc
+
+aws cloudformation delete-stack --stack-name ecs-cluster
+
+aws cloudformation delete-stack --stack-name container-with-auto-scalling
 ```
