@@ -36,6 +36,16 @@ This guide provides step-by-step instructions for creating a Node.js application
 4. **Tag Your Image**: Tag your built image with the ECR repository URI using `docker tag <repository-name> <ecr-repository-uri>`.
 5. **Push to ECR**: Push your Docker image to ECR using `docker push <ecr-repository-uri>`.
 
+```
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 414712314912.dkr.ecr.us-east-1.amazonaws.com
+
+docker build -t ecs-cluster-ecrrepo-vqdre66he3nv .
+
+docker tag ecs-cluster-ecrrepo-vqdre66he3nv:latest 414712314912.dkr.ecr.us-east-1.amazonaws.com/ecs-cluster-ecrrepo-vqdre66he3nv:latest
+
+docker push 414712314912.dkr.ecr.us-east-1.amazonaws.com/ecs-cluster-ecrrepo-vqdre66he3nv:latest
+```
+
 ## Deploying CloudFormation Stacks
 
 To the deploy the container-with-auto-scalling stack you could use different vpc and a ecs-cluster stack. This will allow you different configurations for differente enviroments.
